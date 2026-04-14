@@ -10,12 +10,12 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def call(prompt):
     try:
         response = client.chat.completions.create(
-            model="mixtral-8x7b-32768",   # ✅ stable model
+            model="llama3-70b-8192",   # ✅ UPDATED MODEL
             messages=[
                 {"role": "user", "content": prompt.strip()}
             ],
             temperature=0.5,
-            max_tokens=150   # ✅ safe limit
+            max_tokens=150
         )
         return response.choices[0].message.content
     except Exception as e:
