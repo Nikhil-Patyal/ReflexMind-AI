@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 from agent import run_agent
 
 st.set_page_config(page_title="ReflexMind", layout="wide")
@@ -78,7 +77,9 @@ if "chat" not in st.session_state:
 # ---------------------------
 tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking"])
 
+# ---------------------------
 # CHAT
+# ---------------------------
 with tab1:
     for msg in st.session_state.chat:
         with st.chat_message(msg["role"]):
@@ -89,10 +90,8 @@ with tab1:
     if user_input:
         st.session_state.chat.append({"role": "user", "content": user_input})
 
-        history = "\n".join([m["content"] for m in st.session_state.chat])
-
         with st.spinner("Thinking..."):
-            steps, final = run_agent(user_input, history)
+            steps, final = run_agent(user_input)
 
         st.session_state.steps = steps
 
@@ -104,12 +103,26 @@ with tab1:
             "content": final
         })
 
-# THINKING
+# ---------------------------
+# THINKING PROCESS
+# ---------------------------
 with tab2:
     if "steps" in st.session_state:
         for title, content in st.session_state.steps:
+
+            if "Strategy" in title:
+                css = "strategy"
+            elif "Initial" in title:
+                css = "initial"
+            elif "Evaluation" in title:
+                css = "eval"
+            else:
+                css = "final"
+
             st.markdown(f"""
-            <div class="card">
+            <div class="card {css}">
             <b>{title}</b><br>{content}
             </div>
             """, unsafe_allow_html=True)
+    else:
+        st.info("Run a query to see thinking process.")

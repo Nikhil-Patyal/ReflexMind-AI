@@ -1,11 +1,11 @@
 from groq import Groq
 import os
 
-# Initialize client
+# Initialize Groq client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # ---------------------------
-# CALL GROQ
+# CALL FUNCTION
 # ---------------------------
 def call(prompt):
     response = client.chat.completions.create(
@@ -22,34 +22,45 @@ def call(prompt):
 # ---------------------------
 def run_agent(problem, history=""):
 
-    context = f"{history}\nProblem: {problem}"
-
     steps = []
 
-    # Strategy
-    strategy = call(f"Choose best strategy for:\n{context}")
+    # STEP 1: Strategy Selection
+    strategy = call(f"""
+    Choose the best strategy to solve this problem:
+
+    {problem}
+
+    Options:
+    - Logical reasoning
+    - Step-by-step breakdown
+    - Quick heuristic
+
+    Answer only the strategy name.
+    """)
     steps.append(("🧠 Strategy", strategy))
 
-    # Initial solution
+    # STEP 2: Initial Solution
     solution = call(f"""
-    Solve this problem clearly:
+    Solve this problem clearly step-by-step:
 
-    {context}
+    {problem}
 
-    - Use steps
-    - Give complete answer
+    Ensure the answer is complete.
     """)
     steps.append(("⚙️ Initial Solution", solution))
 
-    # Iteration
+    # STEP 3: Iterative Improvement Loop
     for i in range(2):
 
         evaluation = call(f"""
-        Evaluate this solution:
+        Check this solution:
 
         {solution}
 
-        Answer only: GOOD or IMPROVE
+        Is it correct and complete?
+
+        Answer ONLY:
+        GOOD or IMPROVE
         """)
         steps.append((f"🔍 Evaluation {i+1}", evaluation))
 
@@ -57,12 +68,13 @@ def run_agent(problem, history=""):
             break
 
         solution = call(f"""
-        Improve this solution:
+        Improve this solution and fix any missing parts:
 
         {solution}
         """)
         steps.append((f"✨ Improvement {i+1}", solution))
 
+    # FINAL
     steps.append(("✅ Final Answer", solution))
 
     return steps, solution
