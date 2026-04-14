@@ -14,7 +14,7 @@ def call(prompt):
                 {"role": "user", "content": prompt.strip()}
             ],
             temperature=0.6,
-            max_tokens=5000
+            max_tokens=500   # ✅ safe limit
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -22,49 +22,49 @@ def call(prompt):
 
 
 # ---------------------------
-# MAIN AGENT
+# MAIN AGENT (LONG OUTPUT)
 # ---------------------------
 def run_agent(problem):
 
     steps = []
 
-    # Strategy
-    strategy = call(f"""
-    Give a short strategy (1 line):
-    {problem}
-    """)
+    # STEP 1: Strategy
+    strategy = call("Give a short solving strategy: " + problem)
     steps.append(("🧠 Strategy", strategy))
 
-    # Solution
+    # STEP 2: Initial Answer
     solution = call(f"""
-    Solve this clearly with:
-    - Step-by-step points
-    - Short explanations
-    - Proper formatting
+    Solve this in structured format:
+    - Steps
+    - Explanation
+    - Simple language
 
     Problem: {problem}
     """)
-    steps.append(("⚙️ Solution", solution))
+    steps.append(("⚙️ Initial Solution", solution))
 
-    # Evaluation
-    evaluation = call(f"""
-    Check if this solution is complete:
+    # STEP 3: Expand Answer (🔥 KEY UPGRADE)
+    expanded = call(f"""
+    Expand this answer with:
+    - More explanation
+    - Examples
+    - Better clarity
+    - Add headings
 
+    Answer:
     {solution}
-
-    Answer: COMPLETE or IMPROVE
     """)
-    steps.append(("🔍 Evaluation", evaluation))
+    steps.append(("📈 Expanded Solution", expanded))
 
-    # Improve
-    if "improve" in evaluation.lower():
-        solution = call(f"""
-        Improve and complete this answer:
+    # STEP 4: Final Polished Answer
+    final = call(f"""
+    Combine and refine into final answer:
+    - Clean formatting
+    - Bullet points
+    - Easy to understand
 
-        {solution}
-        """)
-        steps.append(("✨ Improved Solution", solution))
+    {expanded}
+    """)
+    steps.append(("✅ Final Answer", final))
 
-    steps.append(("✅ Final Answer", solution))
-
-    return steps, solution
+    return steps, final
