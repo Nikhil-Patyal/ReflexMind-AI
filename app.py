@@ -4,7 +4,7 @@ from agent import run_agent
 st.set_page_config(page_title="ReflexMind", layout="wide")
 
 # ---------------------------
-# 🎨 UI STYLE
+# UI STYLE
 # ---------------------------
 st.markdown("""
 <style>
@@ -31,7 +31,6 @@ body {
 
 .card {
     background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
     padding: 16px;
     border-radius: 14px;
     margin: 10px 0;
@@ -41,10 +40,6 @@ body {
 .initial { border-left: 6px solid #f59e0b; }
 .eval { border-left: 6px solid #ef4444; }
 .final { border-left: 6px solid #10b981; }
-
-section[data-testid="stSidebar"] {
-    background-color: #020617;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,7 +55,7 @@ st.markdown("""
 # SIDEBAR
 # ---------------------------
 st.sidebar.title("📊 Dashboard")
-st.sidebar.metric("Model", "LLaMA3 (Groq)")
+st.sidebar.metric("Model", "Mixtral (Groq)")
 st.sidebar.metric("Mode", "Online AI")
 
 if st.sidebar.button("🗑 Clear Chat"):
@@ -78,7 +73,7 @@ if "chat" not in st.session_state:
 tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking"])
 
 # ---------------------------
-# CHAT
+# CHAT TAB
 # ---------------------------
 with tab1:
     for msg in st.session_state.chat:
@@ -104,7 +99,7 @@ with tab1:
         })
 
 # ---------------------------
-# THINKING PROCESS
+# THINKING TAB
 # ---------------------------
 with tab2:
     if "steps" in st.session_state:
