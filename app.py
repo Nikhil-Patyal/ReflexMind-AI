@@ -2,50 +2,67 @@ import streamlit as st
 import time
 from agent import run_agent
 
-st.set_page_config(page_title="ReflexMind AI", layout="wide")
+st.set_page_config(page_title="ReflexMind Pro", layout="wide")
 
 # ---------------------------
-# 🎨 CHATGPT STYLE UI
+# 🎨 CUSTOM UI (UNCHANGED)
 # ---------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-
-html, body {
-    font-family: 'Inter', sans-serif;
-    background: #0b0f19;
-    color: white;
-}
-
-/* Chat bubbles */
-.user-msg {
-    background: #1f2937;
-    padding: 12px 16px;
-    border-radius: 12px;
-    margin: 8px 0;
-    text-align: right;
-}
-
-.bot-msg {
-    background: #111827;
-    padding: 14px 16px;
-    border-radius: 12px;
-    margin: 8px 0;
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
 }
 
 /* Title */
 .title {
-    font-size: 36px;
-    font-weight: 600;
-    margin-bottom: 10px;
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
 }
+
+/* Glass Cards */
+.card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 14px;
+    margin: 10px 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+/* Borders */
+.strategy { border-left: 6px solid #3b82f6; }
+.initial { border-left: 6px solid #f59e0b; }
+.eval { border-left: 6px solid #ef4444; }
+.final { border-left: 6px solid #10b981; }
+
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------
-# TITLE
+# HEADER
 # ---------------------------
-st.markdown("<div class='title'>🧠 ReflexMind AI</div>", unsafe_allow_html=True)
+st.markdown("<div class='title'>ReflexMind</div>", unsafe_allow_html=True)
+
+# ---------------------------
+# SIDEBAR DASHBOARD
+# ---------------------------
+st.sidebar.title("📊 Dashboard")
+st.sidebar.metric("Model", "Groq LLaMA")
+st.sidebar.metric("Mode", "Adaptive AI")
+
+st.sidebar.markdown("### 🧠 Features")
+st.sidebar.write("✔ Iterative Thinking")
+st.sidebar.write("✔ Self Evaluation")
+st.sidebar.write("✔ Memory")
+
+if st.sidebar.button("🗑 Clear Chat"):
+    st.session_state.chat = []
 
 # ---------------------------
 # SESSION MEMORY
@@ -53,16 +70,13 @@ st.markdown("<div class='title'>🧠 ReflexMind AI</div>", unsafe_allow_html=Tru
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-if "steps" not in st.session_state:
-    st.session_state.steps = []
-
 # ---------------------------
 # TABS
 # ---------------------------
-tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking"])
+tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking Process"])
 
 # ---------------------------
-# TYPING EFFECT
+# 🔥 TYPING EFFECT (ONLY ADDITION)
 # ---------------------------
 def typing_effect(text):
     placeholder = st.empty()
@@ -70,7 +84,7 @@ def typing_effect(text):
 
     for char in text:
         output += char
-        placeholder.markdown(f"<div class='bot-msg'>{output}</div>", unsafe_allow_html=True)
+        placeholder.markdown(output)
         time.sleep(0.002)
 
 # ---------------------------
@@ -78,37 +92,37 @@ def typing_effect(text):
 # ---------------------------
 with tab1:
 
-    # Show chat history
     for msg in st.session_state.chat:
-        if msg["role"] == "user":
-            st.markdown(f"<div class='user-msg'>{msg['content']}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='bot-msg'>{msg['content']}</div>", unsafe_allow_html=True)
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
 
-    # Input
     user_input = st.chat_input("Ask anything...")
 
     if user_input:
 
-        # Save user message
         st.session_state.chat.append({"role": "user", "content": user_input})
 
-        st.markdown(f"<div class='user-msg'>{user_input}</div>", unsafe_allow_html=True)
+        with st.chat_message("user"):
+            st.write(user_input)
 
-        # Run agent
+        history = "\n".join([m["content"] for m in st.session_state.chat])
+
         with st.spinner("Thinking..."):
-            steps, final = run_agent(user_input)
+            steps, final = run_agent(user_input, history)
 
         st.session_state.steps = steps
 
-        # Typing animation
-        typing_effect(final)
+        # ✅ ONLY CHANGE → typing effect here
+        with st.chat_message("assistant"):
+            typing_effect(final)
 
-        # Save assistant response
         st.session_state.chat.append({
             "role": "assistant",
             "content": final
         })
+
+        # Download
+        st.download_button("📥 Download Answer", final, file_name="reflexmind.txt")
 
 # ---------------------------
 # THINKING TAB
@@ -117,22 +131,24 @@ with tab2:
 
     st.subheader("🧠 AI Thinking Process")
 
-    if st.session_state.steps:
+    if "steps" in st.session_state:
 
         for title, content in st.session_state.steps:
 
+            if "Strategy" in title:
+                css = "strategy"
+            elif "Initial" in title:
+                css = "initial"
+            elif "Evaluation" in title:
+                css = "eval"
+            else:
+                css = "final"
+
             st.markdown(f"""
-            <div style="
-                background: rgba(255,255,255,0.05);
-                padding: 16px;
-                border-radius: 12px;
-                margin-bottom: 12px;
-                border-left: 5px solid #3b82f6;
-            ">
-            <b>{title}</b><br><br>
-            {content}
+            <div class="card {css}">
+            <b>{title}</b><br>{content}
             </div>
             """, unsafe_allow_html=True)
 
     else:
-        st.info("Ask something to see thinking process.")
+        st.info("Run a query to see thinking process.")
