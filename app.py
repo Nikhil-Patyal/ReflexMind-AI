@@ -1,84 +1,60 @@
 import streamlit as st
+import time
 from agent import run_agent
 
-st.set_page_config(page_title="ReflexMind", layout="wide")
+st.set_page_config(page_title="ReflexMind AI", layout="wide")
 
 # ---------------------------
-# 🎨 UI STYLE (IMPROVED)
+# 🎨 CHATGPT STYLE UI
 # ---------------------------
 st.markdown("""
 <style>
-
-/* Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-html, body, [class*="css"]  {
+html, body {
     font-family: 'Inter', sans-serif;
-}
-
-/* Background */
-body {
-    background: linear-gradient(135deg, #0f172a, #020617);
+    background: #0b0f19;
     color: white;
 }
 
-/* Title */
-.title-main {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 600;
-    color: #e2e8f0;
-}
-
-.title-sub {
-    text-align: center;
-    font-size: 14px;
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-/* Cards */
-.card {
-    background: rgba(255,255,255,0.05);
-    padding: 14px;
-    border-radius: 10px;
+/* Chat bubbles */
+.user-msg {
+    background: #1f2937;
+    padding: 12px 16px;
+    border-radius: 12px;
     margin: 8px 0;
-    font-size: 14px;
-    line-height: 1.6;
+    text-align: right;
 }
 
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #020617;
-    font-size: 14px;
+.bot-msg {
+    background: #111827;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin: 8px 0;
 }
 
+/* Title */
+.title {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------
 # TITLE
 # ---------------------------
-st.markdown("""
-<div class="title-main">ReflexMind</div>
-<div class="title-sub">Online AI Problem Solver</div>
-""", unsafe_allow_html=True)
+st.markdown("<div class='title'>🧠 ReflexMind AI</div>", unsafe_allow_html=True)
 
 # ---------------------------
-# SIDEBAR
-# ---------------------------
-st.sidebar.title("📊 Dashboard")
-st.sidebar.write("Model: LLaMA 3.1")
-st.sidebar.write("Mode: Online AI")
-
-if st.sidebar.button("🗑 Clear Chat"):
-    st.session_state.chat = []
-
-# ---------------------------
-# SESSION
+# SESSION MEMORY
 # ---------------------------
 if "chat" not in st.session_state:
     st.session_state.chat = []
+
+if "steps" not in st.session_state:
+    st.session_state.steps = []
 
 # ---------------------------
 # TABS
@@ -86,26 +62,49 @@ if "chat" not in st.session_state:
 tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking"])
 
 # ---------------------------
-# CHAT
+# TYPING EFFECT
+# ---------------------------
+def typing_effect(text):
+    placeholder = st.empty()
+    output = ""
+
+    for char in text:
+        output += char
+        placeholder.markdown(f"<div class='bot-msg'>{output}</div>", unsafe_allow_html=True)
+        time.sleep(0.002)
+
+# ---------------------------
+# CHAT TAB
 # ---------------------------
 with tab1:
-    for msg in st.session_state.chat:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
 
+    # Show chat history
+    for msg in st.session_state.chat:
+        if msg["role"] == "user":
+            st.markdown(f"<div class='user-msg'>{msg['content']}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='bot-msg'>{msg['content']}</div>", unsafe_allow_html=True)
+
+    # Input
     user_input = st.chat_input("Ask anything...")
 
     if user_input:
+
+        # Save user message
         st.session_state.chat.append({"role": "user", "content": user_input})
 
+        st.markdown(f"<div class='user-msg'>{user_input}</div>", unsafe_allow_html=True)
+
+        # Run agent
         with st.spinner("Thinking..."):
             steps, final = run_agent(user_input)
 
         st.session_state.steps = steps
 
-        with st.chat_message("assistant"):
-            st.write(final)
+        # Typing animation
+        typing_effect(final)
 
+        # Save assistant response
         st.session_state.chat.append({
             "role": "assistant",
             "content": final
@@ -115,12 +114,25 @@ with tab1:
 # THINKING TAB
 # ---------------------------
 with tab2:
-    if "steps" in st.session_state:
+
+    st.subheader("🧠 AI Thinking Process")
+
+    if st.session_state.steps:
+
         for title, content in st.session_state.steps:
+
             st.markdown(f"""
-            <div class="card">
-            <b>{title}</b><br>{content}
+            <div style="
+                background: rgba(255,255,255,0.05);
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                border-left: 5px solid #3b82f6;
+            ">
+            <b>{title}</b><br><br>
+            {content}
             </div>
             """, unsafe_allow_html=True)
+
     else:
-        st.info("Run a query to see thinking process.")
+        st.info("Ask something to see thinking process.")
