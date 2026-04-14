@@ -10,7 +10,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def call(prompt):
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",   # ✅ WORKING MODEL
+            model="gemma-7b-it",   # ✅ WORKING MODEL
             messages=[
                 {"role": "user", "content": prompt.strip()}
             ],
