@@ -4,17 +4,17 @@ import os
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # ---------------------------
-# SAFE CALL FUNCTION
+# CALL FUNCTION
 # ---------------------------
 def call(prompt):
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",   # ✅ FINAL WORKING MODEL
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "user", "content": prompt.strip()}
             ],
-            temperature=0.5,
-            max_tokens=800
+            temperature=0.6,
+            max_tokens=400
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -28,17 +28,41 @@ def run_agent(problem):
 
     steps = []
 
-    strategy = call("Best strategy: " + problem)
+    # Strategy
+    strategy = call(f"""
+    Give a short strategy (1 line):
+    {problem}
+    """)
     steps.append(("🧠 Strategy", strategy))
 
-    solution = call("Solve step by step: " + problem)
-    steps.append(("⚙️ Initial Solution", solution))
+    # Solution
+    solution = call(f"""
+    Solve this clearly with:
+    - Step-by-step points
+    - Short explanations
+    - Proper formatting
 
-    evaluation = call("Is this correct? Answer YES or NO:\n" + solution)
+    Problem: {problem}
+    """)
+    steps.append(("⚙️ Solution", solution))
+
+    # Evaluation
+    evaluation = call(f"""
+    Check if this solution is complete:
+
+    {solution}
+
+    Answer: COMPLETE or IMPROVE
+    """)
     steps.append(("🔍 Evaluation", evaluation))
 
-    if "no" in evaluation.lower():
-        solution = call("Improve this answer:\n" + solution)
+    # Improve
+    if "improve" in evaluation.lower():
+        solution = call(f"""
+        Improve and complete this answer:
+
+        {solution}
+        """)
         steps.append(("✨ Improved Solution", solution))
 
     steps.append(("✅ Final Answer", solution))
