@@ -5,7 +5,7 @@ from agent import run_agent
 st.set_page_config(page_title="ReflexMind Pro", layout="wide")
 
 # ---------------------------
-# 🎨 CUSTOM UI (UNCHANGED)
+# 🎨 CUSTOM UI
 # ---------------------------
 st.markdown("""
 <style>
@@ -13,14 +13,12 @@ body {
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
 }
 
-/* Title */
 .title {
     text-align: center;
     font-size: 42px;
     font-weight: bold;
 }
 
-/* Glass Cards */
 .card {
     background: rgba(255,255,255,0.7);
     backdrop-filter: blur(10px);
@@ -28,44 +26,32 @@ body {
     border-radius: 14px;
     margin: 10px 0;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transition: 0.2s;
 }
 
-.card:hover {
-    transform: scale(1.02);
-}
-
-/* Borders */
 .strategy { border-left: 6px solid #3b82f6; }
 .initial { border-left: 6px solid #f59e0b; }
 .eval { border-left: 6px solid #ef4444; }
 .final { border-left: 6px solid #10b981; }
-
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------
-# HEADER
+# TITLE
 # ---------------------------
 st.markdown("<div class='title'>ReflexMind</div>", unsafe_allow_html=True)
 
 # ---------------------------
-# SIDEBAR DASHBOARD
+# SIDEBAR
 # ---------------------------
 st.sidebar.title("📊 Dashboard")
 st.sidebar.metric("Model", "Groq LLaMA")
 st.sidebar.metric("Mode", "Adaptive AI")
 
-st.sidebar.markdown("### 🧠 Features")
-st.sidebar.write("✔ Iterative Thinking")
-st.sidebar.write("✔ Self Evaluation")
-st.sidebar.write("✔ Memory")
-
 if st.sidebar.button("🗑 Clear Chat"):
     st.session_state.chat = []
 
 # ---------------------------
-# SESSION MEMORY
+# SESSION
 # ---------------------------
 if "chat" not in st.session_state:
     st.session_state.chat = []
@@ -73,10 +59,10 @@ if "chat" not in st.session_state:
 # ---------------------------
 # TABS
 # ---------------------------
-tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking Process"])
+tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking"])
 
 # ---------------------------
-# 🔥 TYPING EFFECT (ONLY ADDITION)
+# TYPING EFFECT
 # ---------------------------
 def typing_effect(text):
     placeholder = st.empty()
@@ -88,7 +74,7 @@ def typing_effect(text):
         time.sleep(0.002)
 
 # ---------------------------
-# CHAT TAB
+# CHAT
 # ---------------------------
 with tab1:
 
@@ -105,14 +91,11 @@ with tab1:
         with st.chat_message("user"):
             st.write(user_input)
 
-        history = "\n".join([m["content"] for m in st.session_state.chat])
-
         with st.spinner("Thinking..."):
-            steps, final = run_agent(user_input, history)
+            steps, final = run_agent(user_input)   # ✅ FIXED HERE
 
         st.session_state.steps = steps
 
-        # ✅ ONLY CHANGE → typing effect here
         with st.chat_message("assistant"):
             typing_effect(final)
 
@@ -121,18 +104,12 @@ with tab1:
             "content": final
         })
 
-        # Download
-        st.download_button("📥 Download Answer", final, file_name="reflexmind.txt")
-
 # ---------------------------
 # THINKING TAB
 # ---------------------------
 with tab2:
 
-    st.subheader("🧠 AI Thinking Process")
-
     if "steps" in st.session_state:
-
         for title, content in st.session_state.steps:
 
             if "Strategy" in title:
@@ -149,6 +126,3 @@ with tab2:
             <b>{title}</b><br>{content}
             </div>
             """, unsafe_allow_html=True)
-
-    else:
-        st.info("Run a query to see thinking process.")
