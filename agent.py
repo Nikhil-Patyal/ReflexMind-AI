@@ -14,7 +14,7 @@ def call(prompt):
                 {"role": "user", "content": prompt.strip()}
             ],
             temperature=0.5,
-            max_tokens=120
+            max_tokens=500
         )
         return response.choices[0].message.content
     except Exception as e:
