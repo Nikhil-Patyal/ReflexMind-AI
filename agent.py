@@ -13,8 +13,8 @@ def call(prompt):
             messages=[
                 {"role": "user", "content": prompt.strip()}
             ],
-            temperature=0.6,
-            max_tokens=1000   # ✅ safe limit
+            temperature=0.7,
+            max_tokens=500   # safe limit
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -22,48 +22,59 @@ def call(prompt):
 
 
 # ---------------------------
-# MAIN AGENT (LONG OUTPUT)
+# MAIN AGENT (FULL OUTPUT)
 # ---------------------------
 def run_agent(problem):
 
     steps = []
 
     # STEP 1: Strategy
-    strategy = call("Give a short solving strategy: " + problem)
+    strategy = call("Give best strategy in 1 line: " + problem)
     steps.append(("🧠 Strategy", strategy))
 
     # STEP 2: Initial Answer
     solution = call(f"""
-    Solve this in structured format:
-    - Steps
-    - Explanation
+    Solve this problem with:
+    - Step-by-step explanation
+    - Clear concepts
     - Simple language
 
     Problem: {problem}
     """)
     steps.append(("⚙️ Initial Solution", solution))
 
-    # STEP 3: Expand Answer (🔥 KEY UPGRADE)
+    # STEP 3: Expand (MORE DETAILS)
     expanded = call(f"""
-    Expand this answer with:
-    - More explanation
-    - Examples
-    - Better clarity
-    - Add headings
+    Expand this answer:
+    - Add detailed explanation
+    - Add examples
+    - Explain each step clearly
 
-    Answer:
     {solution}
     """)
-    steps.append(("📈 Expanded Solution", expanded))
+    steps.append(("📈 Expanded Explanation", expanded))
 
-    # STEP 4: Final Polished Answer
-    final = call(f"""
-    Combine and refine into final answer:
-    - Clean formatting
-    - Bullet points
-    - Easy to understand
+    # STEP 4: Deep Expand (VERY LONG)
+    deep = call(f"""
+    Make this answer very detailed:
+    - Add headings
+    - Add bullet points
+    - Add real-life examples
+    - Add advantages / disadvantages
 
     {expanded}
+    """)
+    steps.append(("🧩 Detailed Version", deep))
+
+    # STEP 5: Final Formatting
+    final = call(f"""
+    Format this into clean notes:
+    - Use headings
+    - Use bullet points
+    - Make it easy to read
+    - Make it look like exam answer
+
+    {deep}
     """)
     steps.append(("✅ Final Answer", final))
 
