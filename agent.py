@@ -1,78 +1,46 @@
 from groq import Groq
 import os
 
-# Initialize Groq client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # ---------------------------
-# CALL FUNCTION
+# SAFE CALL FUNCTION
 # ---------------------------
 def call(prompt):
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama3-8b-8192",   # 🔥 smaller + stable model
         messages=[
             {"role": "user", "content": prompt}
-        ]
+        ],
+        temperature=0.7,
+        max_tokens=500
     )
     return response.choices[0].message.content
 
 
 # ---------------------------
-# MAIN AGENT
+# FINAL AGENT (SAFE VERSION)
 # ---------------------------
-def run_agent(problem, history=""):
+def run_agent(problem):
 
     steps = []
 
-    # STEP 1: Strategy Selection
-    strategy = call(f"""
-    Choose the best strategy to solve this problem:
-
-    {problem}
-
-    Options:
-    - Logical reasoning
-    - Step-by-step breakdown
-    - Quick heuristic
-
-    Answer only the strategy name.
-    """)
+    # STEP 1: Strategy
+    strategy = call(f"Best way to solve: {problem}. Answer in 3 words.")
     steps.append(("🧠 Strategy", strategy))
 
-    # STEP 2: Initial Solution
-    solution = call(f"""
-    Solve this problem clearly step-by-step:
-
-    {problem}
-
-    Ensure the answer is complete.
-    """)
+    # STEP 2: Solution
+    solution = call(f"Solve step by step: {problem}")
     steps.append(("⚙️ Initial Solution", solution))
 
-    # STEP 3: Iterative Improvement Loop
-    for i in range(2):
+    # STEP 3: Evaluation
+    evaluation = call(f"Is this correct? Answer YES or NO:\n{solution}")
+    steps.append(("🔍 Evaluation", evaluation))
 
-        evaluation = call(f"""
-        Check this solution:
-
-        {solution}
-
-        Is it correct and complete?
-
-        Answer ONLY:
-        GOOD or IMPROVE
-        """)
-        steps.append((f"🔍 Evaluation {i+1}", evaluation))
-
-        if "good" in evaluation.lower():
-            break
-
-        solution = call(f"""
-        Improve this solution and fix any missing parts:
-
-        {solution}
-        """)
-        steps.append((f"✨ Improvement {i+1}", solution))
+    # STEP 4: Improve if needed
+    if "no" in evaluation.lower():
+        solution = call(f"Improve this answer:\n{solution}")
+        steps.append(("✨ Improved Solution", solution))
 
     # FINAL
     steps.append(("✅ Final Answer", solution))
