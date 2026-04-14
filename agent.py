@@ -8,7 +8,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # ---------------------------
 def call(prompt):
     response = client.chat.completions.create(
-        model="llama3-8b-8192",   # 🔥 smaller + stable model
+        model="mixtral-8x7b-32768",   # 🔥 smaller + stable model
         messages=[
             {"role": "user", "content": prompt}
         ],
