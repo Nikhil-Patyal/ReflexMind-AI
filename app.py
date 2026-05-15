@@ -2,89 +2,88 @@ import streamlit as st
 import time
 from agent import run_agent
 
-st.set_page_config(page_title="ReflexMind Pro", layout="wide")
+# ---------------------------
+# PAGE CONFIG
+# ---------------------------
+st.set_page_config(
+    page_title="ReflexMind AI",
+    layout="wide"
+)
 
 # ---------------------------
-# 🎨 CUSTOM UI
+# CUSTOM CSS
 # ---------------------------
 st.markdown("""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-html, body {
+html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+}
+
+/* Background */
+.stApp {
+    background: #f5f7fb;
 }
 
 /* Title */
-.title {
-    text-align: center;
+.main-title {
     font-size: 42px;
-    font-weight: 600;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 5px;
 }
 
 /* Tagline */
 .tagline {
-    text-align: center;
-    font-size: 14px;
+    font-size: 15px;
     color: #6b7280;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 /* Sidebar */
-.sidebar-text {
-    font-size: 14px;
-    color: #374151;
-    margin-bottom: 6px;
-}
-
-/* Chat */
-.stChatMessage {
-    padding: 10px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+section[data-testid="stSidebar"] {
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
 }
 
 /* Cards */
 .card {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(10px);
-    padding: 18px;
-    border-radius: 14px;
-    margin: 14px 0;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    animation: fadeIn 0.4s ease-in-out;
+    background: white;
+    padding: 22px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Borders */
+/* Thinking Borders */
 .strategy {
-    border-left: 6px solid #3b82f6;
+    border-left: 5px solid #3b82f6;
 }
 
 .initial {
-    border-left: 6px solid #f59e0b;
+    border-left: 5px solid #f59e0b;
 }
 
 .eval {
-    border-left: 6px solid #ef4444;
+    border-left: 5px solid #ef4444;
 }
 
 .final {
-    border-left: 6px solid #10b981;
+    border-left: 5px solid #10b981;
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
+/* Chat spacing */
+.stChatMessage {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Divider */
+.divider {
+    border-top: 1px solid #e5e7eb;
+    margin: 10px 0 18px 0;
 }
 
 </style>
@@ -94,13 +93,13 @@ html, body {
 # HEADER
 # ---------------------------
 st.markdown("""
-<div class='title'>
-ReflexMind
+<div class="main-title">
+🧠 ReflexMind AI
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div class='tagline'>
+<div class="tagline">
 Think • Evaluate • Improve
 </div>
 """, unsafe_allow_html=True)
@@ -111,15 +110,8 @@ Think • Evaluate • Improve
 st.sidebar.title("📊 Dashboard")
 
 st.sidebar.markdown("""
-<div class='sidebar-text'>
-<b>Mode:</b> Adaptive AI
-</div>
-""", unsafe_allow_html=True)
-
-# ---------------------------
-# MODEL SWITCH
-# ---------------------------
-st.sidebar.markdown("### ⚙️ Settings")
+### ⚙️ Settings
+""")
 
 selected_model = st.sidebar.selectbox(
     "Choose Model",
@@ -129,14 +121,14 @@ selected_model = st.sidebar.selectbox(
     ]
 )
 
-# ---------------------------
-# FEATURES
-# ---------------------------
-st.sidebar.markdown("### 🧠 Features")
+st.sidebar.markdown("""
+### 🧠 Features
 
-st.sidebar.write("✔ Iterative Thinking")
-st.sidebar.write("✔ Self Evaluation")
-st.sidebar.write("✔ Memory")
+✔ Iterative Thinking  
+✔ Self Evaluation  
+✔ Adaptive Reasoning  
+✔ Memory
+""")
 
 # ---------------------------
 # CLEAR CHAT
@@ -200,18 +192,18 @@ with tab1:
 
     if user_input:
 
-        # Save user message
+        # Save user msg
         st.session_state.chat.append({
             "role": "user",
             "content": user_input
         })
 
-        # Show user
+        # Show user msg
         with st.chat_message("user"):
 
             st.write(user_input)
 
-        # AI Processing
+        # AI processing
         with st.spinner("Thinking..."):
 
             steps, final = run_agent(
@@ -219,21 +211,21 @@ with tab1:
                 selected_model
             )
 
-        # Save steps
+        # Save thinking
         st.session_state.steps = steps
 
-        # Assistant output
+        # Assistant response
         with st.chat_message("assistant"):
 
             typing_effect(final)
 
-        # Save AI message
+        # Save assistant msg
         st.session_state.chat.append({
             "role": "assistant",
             "content": final
         })
 
-        # Download
+        # Download button
         st.download_button(
             "📥 Download Answer",
             final,
@@ -247,11 +239,15 @@ with tab2:
 
     st.subheader("🧠 AI Thinking Process")
 
+    st.markdown("""
+    <div class="divider"></div>
+    """, unsafe_allow_html=True)
+
     if st.session_state.steps:
 
         for title, content in st.session_state.steps:
 
-            # Style selection
+            # Style choose
             if "Strategy" in title:
                 css = "strategy"
 
@@ -267,45 +263,54 @@ with tab2:
             # Animation
             with st.spinner(f"{title}..."):
 
-                time.sleep(0.4)
+                time.sleep(0.3)
 
-            # CLEAN HTML CARD
-            st.markdown(f"""
-            <div class="card {css}">
+            # CLEAN CARD
+            st.markdown(
+                f"""
+                <div class="card {css}">
 
-                <div style="
-                    font-size:18px;
-                    font-weight:600;
-                    margin-bottom:10px;
-                ">
-                    {title}
+                    <div style="
+                        font-size:18px;
+                        font-weight:600;
+                        margin-bottom:12px;
+                        color:#111827;
+                    ">
+                        {title}
+                    </div>
+
+                    <div style="
+                        line-height:1.8;
+                        color:#374151;
+                        font-size:15px;
+                        white-space: pre-wrap;
+                    ">
+                        {content}
+                    </div>
+
                 </div>
-
-                <div style="
-                    line-height:1.8;
-                    color:#374151;
-                    font-size:15px;
-                ">
-                    {content}
-                </div>
-
-            </div>
-            """, unsafe_allow_html=True)
+                """,
+                unsafe_allow_html=True
+            )
 
     else:
 
-        st.info("Run a query to see thinking process.")
+        st.info("Run a query to see the AI thinking process.")
 
 # ---------------------------
 # FOOTER
 # ---------------------------
 st.markdown("""
-<div style='
-    text-align:center;
-    color:gray;
-    margin-top:30px;
-    font-size:13px;
-'>
+<br>
+
+<div style="
+text-align:center;
+color:gray;
+font-size:13px;
+padding-bottom:10px;
+">
+
 Built with Reflexive AI Reasoning • ReflexMind AI
+
 </div>
 """, unsafe_allow_html=True)
