@@ -34,9 +34,17 @@ def run_agent(problem, model_name):
 
     steps = []
 
-    # Strategy
+    # ---------------------------
+    # STRATEGY
+    # ---------------------------
     strategy = call(f"""
     Briefly explain the best approach for answering this query.
+
+    IMPORTANT:
+    - Respond in plain English only
+    - Never use HTML
+    - Never use code
+    - Keep answer short
 
     Query:
     {problem}
@@ -44,16 +52,23 @@ def run_agent(problem, model_name):
 
     steps.append(("🧠 Strategy", strategy))
 
-    # Initial Response
+    # ---------------------------
+    # INITIAL RESPONSE
+    # ---------------------------
     answer = call(f"""
     Answer this query naturally and intelligently.
 
     IMPORTANT:
-    - Do NOT always use step-by-step format
-    - If the question is simple, answer normally
-    - If the question is complex, use structure where needed
-    - Keep the response clean and readable
-    - Explain clearly like ChatGPT
+    - NEVER use HTML
+    - NEVER use CSS
+    - NEVER use code blocks
+    - NEVER generate tags like <div>
+    - NEVER write programming syntax
+    - Respond naturally like ChatGPT
+    - Keep formatting clean and readable
+    - Use bullets only if needed
+    - If question is simple, answer normally
+    - If question is complex, structure properly
 
     Query:
     {problem}
@@ -61,9 +76,16 @@ def run_agent(problem, model_name):
 
     steps.append(("⚙️ Initial Response", answer))
 
-    # Evaluation
+    # ---------------------------
+    # EVALUATION
+    # ---------------------------
     evaluation = call(f"""
     Evaluate this response briefly.
+
+    IMPORTANT:
+    - Plain English only
+    - No HTML
+    - No code
 
     Response:
     {answer}
@@ -75,21 +97,26 @@ def run_agent(problem, model_name):
 
     steps.append(("🔍 Evaluation", evaluation))
 
-    # Improved Response
+    # ---------------------------
+    # IMPROVED RESPONSE
+    # ---------------------------
     improved = call(f"""
-    Improve this response.
+    Improve this response in normal English.
+
+    IMPORTANT:
+    - NEVER use HTML
+    - NEVER use code
+    - NEVER generate tags
+    - Keep response human readable
+    - Write naturally like ChatGPT
+    - Avoid unnecessary step-by-step formatting
+    - Keep answer clean and professional
 
     Original Response:
     {answer}
 
     Feedback:
     {evaluation}
-
-    IMPORTANT:
-    - Keep the response natural
-    - Avoid unnecessary steps
-    - Improve clarity and quality
-    - Format only where needed
 
     Query:
     {problem}
