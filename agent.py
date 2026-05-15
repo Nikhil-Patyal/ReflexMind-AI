@@ -36,57 +36,65 @@ def run_agent(problem, model_name):
 
     # Strategy
     strategy = call(f"""
-    Give the best strategy in 1 line.
+    Briefly explain the best approach for answering this query.
 
-    Problem:
+    Query:
     {problem}
     """, model_name)
 
     steps.append(("🧠 Strategy", strategy))
 
-    # Initial Solution
-    solution = call(f"""
-    Solve this clearly:
-    - Step-by-step
-    - Clear explanation
-    - Proper formatting
+    # Initial Answer
+    answer = call(f"""
+    Answer this query naturally and intelligently.
 
-    Problem:
+    IMPORTANT:
+    - Do NOT always use step-by-step format
+    - If the question is simple, answer normally
+    - If the question is complex, use structure where needed
+    - Keep the response clean and readable
+    - Explain clearly like ChatGPT
+
+    Query:
     {problem}
     """, model_name)
 
-    steps.append(("⚙️ Initial Solution", solution))
+    steps.append(("⚙️ Initial Response", answer))
 
     # Evaluation
     evaluation = call(f"""
-    Evaluate this solution carefully.
+    Evaluate this response briefly.
 
-    Solution:
-    {solution}
+    Response:
+    {answer}
 
-    Tell:
-    - What is correct
+    Mention:
+    - What is good
     - What can improve
     """, model_name)
 
     steps.append(("🔍 Evaluation", evaluation))
 
-    # Improved Solution
+    # Improved Answer
     improved = call(f"""
-    Improve this solution.
+    Improve this response.
 
-    Original:
-    {solution}
+    Original Response:
+    {answer}
 
     Feedback:
     {evaluation}
 
-    Make it:
-    - More detailed
-    - Better formatted
-    - Easier to understand
+    IMPORTANT:
+    - Keep the response natural
+    - Avoid unnecessary steps
+    - Improve clarity and quality
+    - Format only where needed
+
+    Query:
+    {problem}
     """, model_name)
 
-    steps.append(("✨ Improved Solution", improved))
+    steps.append(("✨ Improved Response", improved))
 
     return steps, improved
