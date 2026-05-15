@@ -9,10 +9,9 @@ st.set_page_config(page_title="ReflexMind Pro", layout="wide")
 # ---------------------------
 st.markdown("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
-html, body, [class*="css"] {
+html, body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
 }
@@ -22,7 +21,6 @@ html, body, [class*="css"] {
     text-align: center;
     font-size: 42px;
     font-weight: 600;
-    color: #111827;
 }
 
 /* Tagline */
@@ -30,27 +28,35 @@ html, body, [class*="css"] {
     text-align: center;
     font-size: 14px;
     color: #6b7280;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 /* Sidebar text */
 .sidebar-text {
     font-size: 14px;
     color: #374151;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+}
+
+/* Chat spacing */
+.stChatMessage {
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
 }
 
 /* Glass Cards */
 .card {
-    background: rgba(255,255,255,0.72);
+    background: rgba(255,255,255,0.7);
     backdrop-filter: blur(10px);
-    padding: 18px;
+    padding: 16px;
     border-radius: 14px;
-    margin: 12px 0;
+    margin: 10px 0;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    animation: fadeIn 0.4s ease-in-out;
 }
 
-/* Borders */
+/* Card Borders */
 .strategy {
     border-left: 6px solid #3b82f6;
 }
@@ -67,13 +73,17 @@ html, body, [class*="css"] {
     border-left: 6px solid #10b981;
 }
 
-/* Chat spacing */
-.stChatMessage {
-    padding: 10px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -82,24 +92,34 @@ html, body, [class*="css"] {
 # ---------------------------
 st.markdown("<div class='title'>ReflexMind</div>", unsafe_allow_html=True)
 
-st.markdown(
-    "<div class='tagline'>Think • Evaluate • Improve</div>",
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class='tagline'>
+Think • Evaluate • Improve
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------
 # SIDEBAR
 # ---------------------------
 st.sidebar.title("📊 Dashboard")
 
-st.sidebar.markdown(
-    "<div class='sidebar-text'><b>Model:</b> LLaMA 3.1 (Groq)</div>",
-    unsafe_allow_html=True
-)
+st.sidebar.markdown("""
+<div class='sidebar-text'>
+<b>Mode:</b> Adaptive AI
+</div>
+""", unsafe_allow_html=True)
 
-st.sidebar.markdown(
-    "<div class='sidebar-text'><b>Mode:</b> Adaptive AI</div>",
-    unsafe_allow_html=True
+# ---------------------------
+# MODEL SWITCH
+# ---------------------------
+st.sidebar.markdown("### ⚙️ Settings")
+
+selected_model = st.sidebar.selectbox(
+    "Choose Model",
+    [
+        "llama-3.3-70b-versatile",
+        "qwen/qwen3-32b"
+    ]
 )
 
 st.sidebar.markdown("### 🧠 Features")
@@ -133,6 +153,7 @@ tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking Process"])
 # TYPING EFFECT
 # ---------------------------
 def typing_effect(text):
+
     placeholder = st.empty()
     output = ""
 
@@ -148,8 +169,9 @@ def typing_effect(text):
 # ---------------------------
 with tab1:
 
-    # Show old chat
+    # Show previous chats
     for msg in st.session_state.chat:
+
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
@@ -164,22 +186,25 @@ with tab1:
             "content": user_input
         })
 
-        # Show user message
         with st.chat_message("user"):
             st.write(user_input)
 
         # Run AI
         with st.spinner("Thinking..."):
-            steps, final = run_agent(user_input)
+
+            steps, final = run_agent(
+                user_input,
+                selected_model
+            )
 
         # Save thinking steps
         st.session_state.steps = steps
 
-        # Assistant response with typing
+        # Assistant response
         with st.chat_message("assistant"):
             typing_effect(final)
 
-        # Save assistant response
+        # Save AI response
         st.session_state.chat.append({
             "role": "assistant",
             "content": final
@@ -203,7 +228,7 @@ with tab2:
 
         for title, content in st.session_state.steps:
 
-            # Dynamic card colors
+            # Card styles
             if "Strategy" in title:
                 css = "strategy"
 
@@ -216,23 +241,25 @@ with tab2:
             else:
                 css = "final"
 
-            # Card UI
+            # Animation
+            with st.spinner(f"{title}..."):
+                time.sleep(0.4)
+
+            # Card
             st.markdown(f"""
             <div class="card {css}">
 
                 <div style="
                     font-size:18px;
                     font-weight:600;
-                    margin-bottom:10px;
-                    color:#111827;
+                    margin-bottom:8px;
                 ">
                     {title}
                 </div>
 
                 <div style="
-                    line-height:1.8;
+                    line-height:1.7;
                     color:#374151;
-                    font-size:15px;
                 ">
                     {content}
                 </div>
@@ -247,12 +274,12 @@ with tab2:
 # FOOTER
 # ---------------------------
 st.markdown("""
-<div style='text-align:center;
-            color:gray;
-            margin-top:30px;
-            font-size:13px;'>
-
+<div style='
+    text-align:center;
+    color:gray;
+    margin-top:30px;
+    font-size:13px;
+'>
 Built with Reflexive AI Reasoning • ReflexMind AI
-
 </div>
 """, unsafe_allow_html=True)

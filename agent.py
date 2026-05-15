@@ -44,7 +44,7 @@ def run_agent(problem, model_name):
 
     steps.append(("🧠 Strategy", strategy))
 
-    # Initial Answer
+    # Initial Response
     answer = call(f"""
     Answer this query naturally and intelligently.
 
@@ -75,7 +75,7 @@ def run_agent(problem, model_name):
 
     steps.append(("🔍 Evaluation", evaluation))
 
-    # Improved Answer
+    # Improved Response
     improved = call(f"""
     Improve this response.
 
