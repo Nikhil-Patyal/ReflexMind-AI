@@ -6,17 +6,23 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # ---------------------------
 # CALL FUNCTION
 # ---------------------------
-def call(prompt):
+def call(prompt, model_name):
+
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=model_name,
             messages=[
-                {"role": "user", "content": prompt.strip()}
+                {
+                    "role": "user",
+                    "content": prompt.strip()
+                }
             ],
-            temperature=0.6,
-            max_tokens=2500
+            temperature=0.7,
+            max_tokens=5000
         )
+
         return response.choices[0].message.content
+
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -24,47 +30,63 @@ def call(prompt):
 # ---------------------------
 # MAIN AGENT
 # ---------------------------
-def run_agent(problem):
+def run_agent(problem, model_name):
 
     steps = []
 
     # Strategy
     strategy = call(f"""
-    Give a short strategy (1 line):
+    Give the best strategy in 1 line.
+
+    Problem:
     {problem}
-    """)
+    """, model_name)
+
     steps.append(("🧠 Strategy", strategy))
 
-    # Solution
+    # Initial Solution
     solution = call(f"""
-    Solve this clearly with:
-    - Step-by-step points
-    - Short explanations
+    Solve this clearly:
+    - Step-by-step
+    - Clear explanation
     - Proper formatting
 
-    Problem: {problem}
-    """)
-    steps.append(("⚙️ Solution", solution))
+    Problem:
+    {problem}
+    """, model_name)
+
+    steps.append(("⚙️ Initial Solution", solution))
 
     # Evaluation
     evaluation = call(f"""
-    Check if this solution is complete:
+    Evaluate this solution carefully.
 
+    Solution:
     {solution}
 
-    Answer: COMPLETE or IMPROVE
-    """)
+    Tell:
+    - What is correct
+    - What can improve
+    """, model_name)
+
     steps.append(("🔍 Evaluation", evaluation))
 
-    # Improve
-    if "improve" in evaluation.lower():
-        solution = call(f"""
-        Improve and complete this answer:
+    # Improved Solution
+    improved = call(f"""
+    Improve this solution.
 
-        {solution}
-        """)
-        steps.append(("✨ Improved Solution", solution))
+    Original:
+    {solution}
 
-    steps.append(("✅ Final Answer", solution))
+    Feedback:
+    {evaluation}
 
-    return steps, solution
+    Make it:
+    - More detailed
+    - Better formatted
+    - Easier to understand
+    """, model_name)
+
+    steps.append(("✨ Improved Solution", improved))
+
+    return steps, improved
