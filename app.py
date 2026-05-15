@@ -109,14 +109,16 @@ st.sidebar.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Model switch
+# ---------------------------
+# MODEL SWITCH
+# ---------------------------
 st.sidebar.markdown("### ⚙️ Settings")
 
 selected_model = st.sidebar.selectbox(
     "Choose Model",
     [
-        "llama-3.1-8b-instant",
-        "llama3-8b-8192"
+        "llama-3.3-70b-versatile",
+        "qwen/qwen3-32b"
     ]
 )
 
@@ -125,7 +127,9 @@ st.sidebar.write("✔ Iterative Thinking")
 st.sidebar.write("✔ Self Evaluation")
 st.sidebar.write("✔ Memory")
 
-# Clear button
+# ---------------------------
+# CLEAR CHAT
+# ---------------------------
 if st.sidebar.button("🗑 Clear Chat"):
     st.session_state.chat = []
     st.session_state.steps = []
@@ -149,6 +153,7 @@ tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking Process"])
 # TYPING EFFECT
 # ---------------------------
 def typing_effect(text):
+
     placeholder = st.empty()
     output = ""
 
@@ -170,7 +175,7 @@ with tab1:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # Input
+    # User input
     user_input = st.chat_input("Ask anything...")
 
     if user_input:
@@ -205,7 +210,7 @@ with tab1:
             "content": final
         })
 
-        # Download
+        # Download button
         st.download_button(
             "📥 Download Answer",
             final,
@@ -223,7 +228,7 @@ with tab2:
 
         for title, content in st.session_state.steps:
 
-            # Card colors
+            # Card styles
             if "Strategy" in title:
                 css = "strategy"
 
