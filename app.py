@@ -9,6 +9,7 @@ st.set_page_config(page_title="ReflexMind Pro", layout="wide")
 # ---------------------------
 st.markdown("""
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
 html, body {
@@ -31,32 +32,32 @@ html, body {
     margin-bottom: 20px;
 }
 
-/* Sidebar text */
+/* Sidebar */
 .sidebar-text {
     font-size: 14px;
     color: #374151;
     margin-bottom: 6px;
 }
 
-/* Chat spacing */
+/* Chat */
 .stChatMessage {
     padding: 10px;
     border-radius: 12px;
     margin-bottom: 10px;
 }
 
-/* Glass Cards */
+/* Cards */
 .card {
     background: rgba(255,255,255,0.7);
     backdrop-filter: blur(10px);
-    padding: 16px;
+    padding: 18px;
     border-radius: 14px;
-    margin: 10px 0;
+    margin: 14px 0;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     animation: fadeIn 0.4s ease-in-out;
 }
 
-/* Card Borders */
+/* Borders */
 .strategy {
     border-left: 6px solid #3b82f6;
 }
@@ -79,18 +80,24 @@ html, body {
         opacity: 0;
         transform: translateY(8px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------
 # HEADER
 # ---------------------------
-st.markdown("<div class='title'>ReflexMind</div>", unsafe_allow_html=True)
+st.markdown("""
+<div class='title'>
+ReflexMind
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <div class='tagline'>
@@ -122,7 +129,11 @@ selected_model = st.sidebar.selectbox(
     ]
 )
 
+# ---------------------------
+# FEATURES
+# ---------------------------
 st.sidebar.markdown("### 🧠 Features")
+
 st.sidebar.write("✔ Iterative Thinking")
 st.sidebar.write("✔ Self Evaluation")
 st.sidebar.write("✔ Memory")
@@ -131,12 +142,14 @@ st.sidebar.write("✔ Memory")
 # CLEAR CHAT
 # ---------------------------
 if st.sidebar.button("🗑 Clear Chat"):
+
     st.session_state.chat = []
     st.session_state.steps = []
+
     st.rerun()
 
 # ---------------------------
-# SESSION MEMORY
+# SESSION
 # ---------------------------
 if "chat" not in st.session_state:
     st.session_state.chat = []
@@ -147,7 +160,10 @@ if "steps" not in st.session_state:
 # ---------------------------
 # TABS
 # ---------------------------
-tab1, tab2 = st.tabs(["💬 Chat", "🧠 Thinking Process"])
+tab1, tab2 = st.tabs([
+    "💬 Chat",
+    "🧠 Thinking Process"
+])
 
 # ---------------------------
 # TYPING EFFECT
@@ -158,8 +174,11 @@ def typing_effect(text):
     output = ""
 
     for char in text:
+
         output += char
+
         placeholder.markdown(output + "▌")
+
         time.sleep(0.002)
 
     placeholder.markdown(output)
@@ -169,13 +188,14 @@ def typing_effect(text):
 # ---------------------------
 with tab1:
 
-    # Show previous chats
+    # Previous chats
     for msg in st.session_state.chat:
 
         with st.chat_message(msg["role"]):
+
             st.write(msg["content"])
 
-    # User input
+    # Input
     user_input = st.chat_input("Ask anything...")
 
     if user_input:
@@ -186,10 +206,12 @@ with tab1:
             "content": user_input
         })
 
+        # Show user
         with st.chat_message("user"):
+
             st.write(user_input)
 
-        # Run AI
+        # AI Processing
         with st.spinner("Thinking..."):
 
             steps, final = run_agent(
@@ -197,20 +219,21 @@ with tab1:
                 selected_model
             )
 
-        # Save thinking steps
+        # Save steps
         st.session_state.steps = steps
 
-        # Assistant response
+        # Assistant output
         with st.chat_message("assistant"):
+
             typing_effect(final)
 
-        # Save AI response
+        # Save AI message
         st.session_state.chat.append({
             "role": "assistant",
             "content": final
         })
 
-        # Download button
+        # Download
         st.download_button(
             "📥 Download Answer",
             final,
@@ -228,7 +251,7 @@ with tab2:
 
         for title, content in st.session_state.steps:
 
-            # Card styles
+            # Style selection
             if "Strategy" in title:
                 css = "strategy"
 
@@ -243,23 +266,25 @@ with tab2:
 
             # Animation
             with st.spinner(f"{title}..."):
+
                 time.sleep(0.4)
 
-            # Card
+            # CLEAN HTML CARD
             st.markdown(f"""
             <div class="card {css}">
 
                 <div style="
                     font-size:18px;
                     font-weight:600;
-                    margin-bottom:8px;
+                    margin-bottom:10px;
                 ">
                     {title}
                 </div>
 
                 <div style="
-                    line-height:1.7;
+                    line-height:1.8;
                     color:#374151;
+                    font-size:15px;
                 ">
                     {content}
                 </div>
@@ -268,6 +293,7 @@ with tab2:
             """, unsafe_allow_html=True)
 
     else:
+
         st.info("Run a query to see thinking process.")
 
 # ---------------------------
