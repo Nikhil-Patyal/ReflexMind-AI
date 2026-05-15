@@ -233,70 +233,71 @@ with tab1:
         )
 
 # ---------------------------
-# THINKING TAB
+# THINKING TAB (FINAL FIXED)
 # ---------------------------
 with tab2:
 
     st.subheader("🧠 AI Thinking Process")
 
-    st.markdown("""
-    <div class="divider"></div>
-    """, unsafe_allow_html=True)
-
     if st.session_state.steps:
 
         for title, content in st.session_state.steps:
 
-            # Style choose
+            # Border colors
             if "Strategy" in title:
-                css = "strategy"
+                border = "#3b82f6"
 
             elif "Initial" in title:
-                css = "initial"
+                border = "#f59e0b"
 
             elif "Evaluation" in title:
-                css = "eval"
+                border = "#ef4444"
 
             else:
-                css = "final"
+                border = "#10b981"
 
-            # Animation
-            with st.spinner(f"{title}..."):
-
-                time.sleep(0.3)
-
-            # CLEAN CARD
+            # Clean Card Header
             st.markdown(
                 f"""
-                <div class="card {css}">
-
+                <div style="
+                    background:white;
+                    padding:16px;
+                    border-radius:14px;
+                    border-left:5px solid {border};
+                    margin-top:12px;
+                    margin-bottom:8px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                ">
                     <div style="
                         font-size:18px;
                         font-weight:600;
-                        margin-bottom:12px;
                         color:#111827;
                     ">
                         {title}
                     </div>
-
-                    <div style="
-                        line-height:1.8;
-                        color:#374151;
-                        font-size:15px;
-                        white-space: pre-wrap;
-                    ">
-                        {content}
-                    </div>
-
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
+            # CLEAN TEXT OUTPUT
+            cleaned_content = (
+                str(content)
+                .replace("<div>", "")
+                .replace("</div>", "")
+                .replace("<br>", "")
+                .replace("<br/>", "")
+                .replace("<br />", "")
+            )
+
+            # Normal English display
+            st.markdown(cleaned_content)
+
+            st.divider()
+
     else:
 
         st.info("Run a query to see the AI thinking process.")
-
 # ---------------------------
 # FOOTER
 # ---------------------------
